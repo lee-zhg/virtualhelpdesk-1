@@ -1,8 +1,11 @@
 [![Build Status](https://travis-ci.org/IBM/virtualhelpdesk.svg?branch=master)](https://travis-ci.org/IBM/virtualhelpdesk)
 
-# Virtual HelpDesk using IBM Watson Assistant, Discovery service and Maximo/IBM Control Desk
+# Virtual HelpDesk using IBM Watson Assistant, Discovery service and ServiceNow
 
-This Node.js application demonstrates how to build a `Virtual HelpDesk`, and use the Watson Assistant (formerly Conversation) and Discovery services to interact with end users for simple Q/A. With proper training, Assistant service can cover most of common questions/requests. When it is not been trained to address end users' specific question, the virtual agent searches in the knowledge base through Watson Discovery service and presents relevant entries to the end user. If the end user is still not satisfied, a new ticket is created in a back-office ticketing system, such as Maximo/IBM Control Desk(ICD) system.
+This Node.js application demonstrates how to build a `Virtual HelpDesk`, and use the Watson Assistant (formerly Conversation) and Discovery services to interact with end users for simple Q/A. With proper training, Assistant service can cover most of common questions/requests. When it is not been trained to address end users' specific question, the virtual agent searches in the knowledge base through Watson Discovery service and presents relevant entries to the end user. If the end user is still not satisfied, a new ticket is created in a back-office ticketing system, such as ServiceNow system.
+
+Note, this is a variation of the original code pattern [VirtualHelpDesk](https://github.com/IBM/virtualhelpdesk). Instead of Maximo/ICD as the backend ticketing system, this code pattern connects to ServiceNow.
+
 
 ![Demo](doc/source/images/ticketbot.png)
 
@@ -20,7 +23,7 @@ This Node.js application demonstrates how to build a `Virtual HelpDesk`, and use
 
 * [IBM Watson Assistant](https://www.ibm.com/watson/developercloud/conversation.html): Build, test and deploy a bot or virtual agent across mobile devices, messaging platforms, or even on a physical robot.
 * [IBM Watson Discovery](https://www.ibm.com/watson/developercloud/discovery.html): A cognitive search and content analytics engine for applications to identify patterns, trends, and actionable insights.
-* [Maximo/IBM Control Desk(ICD)](https://www-01.ibm.com/software/applications/control-desk/): Back-office ticketing system. Other ticketing system can be used alternatively.
+* [ServiceNowMaximo/IBM Control Desk(ICD)](https://www.servicenow.com/): Back-office ticketing system. Other ticketing system can be used alternatively.
 
 ![Demo](doc/source/images/VirtualHelpDeskComponents.png)
 
@@ -153,50 +156,6 @@ Watson Discovery service is to be setup to search in the knowledge base when the
 
 1. Select three JSON files from local file system where you downloaded and unzipped `knowledgebase.zip` file. This may take a few seconds, you will see a notification when the process is finished
 
-## Setting up trial IBM Control Desk SaaS system
-
-If you don't have an available in-house Maximo/ICD system to integrate with Watson services in this code pattern, you may request a trial ICD SaaS system.
-
-You may request a [trial ICD SaaS system](https://www.ibm.com/us-en/marketplace/it-service-management) at no cost. Click the `Free 30-day trial` link and follow the procedure. It may take a while for the system orchestration to complete.
-
-![Screen capture of workspace tile menu](doc/source/images/ICD_trial.png)
-
-After the trial ICD SaaS system is active, you should receive an email for your trial ICD system.
-
-    Thank you for requesting IBM Control Desk on Cloud. Your trial is now ready for you to start using.
-
-    The Products and Services page provides access to all of your trials and subscriptions, and includes additional information to help you get started,as well as information for product support. This would be a good link to bookmark!
-
-    Your trial is valid through Sun, 22 Apr 2018 02:09 UTC. 
-    
-    Enjoy your trial to IBM Control Desk on Cloud!
- 
-    Sincerely,
-    IBM Marketplace Team 
-
-Click [Products and Services](https://myibm.ibm.com/products-services/) link in the email to navigate to your Products and service home page. One of trial offers is `IBM Control Desk on Cloud Trial`.
-
-![Screen capture of workspace tile menu](doc/source/images/ICD_trial_active.png)
-
-Click `Manage` button to review the Overview page of your trial ICD system. In the navigation pane on the left, select `Usage instructions`.
-
-![Screen capture of workspace tile menu](doc/source/images/ICD_trial_info.png)
-
-Default account information is displayed on `Usage instructions` page. Take a note of password for maxadmin account for further code pattern configuration.
-
-    Your trial is predefined with demo data and several sign in IDs that you can use to see how IBM Control Desk is tailored for different types of users. When logging in to IBM Control Desk, use one of the following user IDs and use the password sNzuxX7S for all IDs.
-
-        bob - End user (originates tickets, service requests, and catalog requests)
-        scott - Service Desk Agent (handles service requests, incidents, and problems)
-        franklin - Change Manager (works with changes, releases, and the configuration management database)
-        jake - Asset Manager (handles hardware and software assets)
-        maxadmin - Super user (has full administrative rights)    
-
-click `Launch` button to bring up ICD login screen. Note down the login page URL for late configuration. For example, 
-    
-    https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/maximo_t4hj/webclient/login/login.jsp?welcome=true
-
-Login to your trail ICD SaaS system and verify it's working.
 
 ## Installing locally
 
@@ -304,145 +263,9 @@ Use GitHub to clone the repository locally. In a terminal, run:
 1. Save the file.
 
 
-### Configuring the Maximo/ICD environment
+### Configuring ServiceNow
 
-Default behavior of a Maximo/ICD system was changed slightly in one of v7.6.0.x releases. The way used originally in this code pattern to make REST API calls to Maximo/ICD system, is no longer available after out of box deployment. The new way is not available in old Maximo/ICD releases. For this reason, two ways to make REST API calls to Maximo.ICD system is discussed.
-
-One way to identify if you have an old release of Maximo/ICD system or a new one, is to check if you have OSLC Resources application in your system. Navigation path is Go To Applications -> Integration -> OSLC Resources. If you recently requested a trial ICD system, you have the latest release.
-
-
-#### Configuring Object Structures in Maximo/ICD system
-
-This section is only required if you have a newer release of Maximo/ICD system(there is OSLC Resources application in your system).
-
-To create new Object Structure MYSR,
-
-1. Login to your Maximo/ICD system.
-
-1. Navigate to `Go To Applications` -> `Integration` -> `Object Structures`.
-
-1. Search and open the Object Structure `OSLCSR` (or `OSLCSRDETAIL`).
-
-1. Select `More Actions` -> `Duplicate Object Structure`.
-
-1. Define the new object structure,
-    * Object Structure Name = “MYSR”
-    * Description = “My Service Request Resource”
-    * Consumed By = “OSLC”
-
-1. Save the new Object Structure.
-
-1. Still in the Object Structure MYSR record, navigate to `More Actions` (or `Select Action`) -> `Exclude/Include Fields`.
-
-1. Locate attribute `AFFECTEDPERSON` and unselect the `Exclude?` checkbox.
-
-
-#### Configuring OSLC Resources in Maximo/ICD system
-
-This section is only required if you have a newer release of Maximo/ICD system(there is OSLC Resources application in your system).
-
-To create new OSLC Resource MYSR,
-
-1. Login to your Maximo/ICD system.
-
-1. Navigate to `Go To Applications` -> `Integration` -> `OSLC Resources`.
-
-1. Click the `NEW` icon.
-
-1. Define the new OSLC resource,
-    * OSLC Resource Name = “MYSR”
-    * Description = “My Service Request Resource”
-    * Object Structure = “MYSR”
-    * Domain Name = “SmartCloudControlDesk” (“SmarterPhysicalInfrastructure” for a Maximo system)
-    * Default Namespace URI = http://jazz.net/ns/ism/helpdesk/sccd# (http://jazz.net/ns/ism/asset/smarter_physical_infrastructure# for a Maximo system)
-
-1. Save.
-
-
-#### Configuring .env file connecting to a new release of Maximo/ICD system
-
-Perform tasks in this section if you have a `newer` release of Maximo/ICD system(there is OSLC Resources application in your system).
-
-1. Set `MAXIMO_AUTH` environment variable in file .env. This variable setting depends on how Maximo/ICD authentication is configured.
-
-    * `Application Server Authentication (LDAP)` - In this case, the variable has two parts separated by a blank space. The first part is the value "Basic". The second part is `user:password` base64 encoded. You can get its value through any online base64 encoder based on your ICD/Maximo user:password.
-
-    * `Native Maximo Authentication` - In this case, the variable has one part only. It is `user:password` base64 encoded. You can get its value through any online base64 encoder based on your ICD/Maximo user:password. Note, the trial ICD SaaS system has navive Maximo authentication.
-
-1. Keep `application/json` as the value of `MAXIMO_CONTEXT_TYPE` environment variable.
-
-1. Modify the hostname portion of `MAXIMO_REST_URL` environment variable to point to your ICD/Maximo system. If you are connecting to trial ICD system, you may have to modify its context root as well. For example, if the URL used to login to the trial ICD system is https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/maximo_t4hj, the URL in the .env file will be https://siwr35cdwsa-tsb.sccd.ibmserviceengage.com/maximo_t4hj/oslc/os/MYSR.
-
-1. Set `MAXIMO_PERSONID` environment variable to a valid person ID in your ICD/Maximo system. For example, MAXADMIN. Note, the person ID is typically case sensitive.
-
-1. Set `MAXIMO_UI_URL` environment variable in the similar way as you have done for MAXIMO_REST_URL environment variable. Change its hostname and context root.
-
-1. Set `MAXIMO_CLASSSTRUCTUREID` environment variable to a valid classstructureid in your ICD/Maximo system. For example, 21 which is typically configured in a trial ICD system.
-
-1. Set `MAXIMO_PREFIX` environment variable. For example, sccd in a ICD system, spi in a Maximo system.
-
-    ```bash
-    # For Application Server Authentication (LDAP)
-    MAXIMO_AUTH=BASIC bWF4YWRtaW46S2h0TlBncGM=
-    MAXIMO_CONTEXT_TYPE=application/json
-    MAXIMO_REST_URL=https://siwr35cdwsa-tsb.sccd.ibmserviceengage.com/maximo_t4hj/oslc/os/MYSR
-    MAXIMO_PERSONID=MAXADMIN
-    MAXIMO_CLASSSTRUCTUREID=21
-    MAXIMO_PREFIX=sccd
-    MAXIMO_UI_URL=https://siwr35cdwsa-tsb.sccd.ibmserviceengage.com/maximo_t4hj/ui/?event=loadapp&value=sr&additionalevent=useqbe&forcereload=true/&additionaleventvalue=ticketid=
-    ```
-
-    ```bash
-    # For Native Maximo Authentication
-    MAXIMO_AUTH=bWF4YWRtaW46S2h0TlBncGM=
-    MAXIMO_CONTEXT_TYPE=application/json
-    MAXIMO_REST_URL=https://siwr35cdwsa-tsb.sccd.ibmserviceengage.com/maximo_t4hj/oslc/os/MYSR
-    MAXIMO_PERSONID=MAXADMIN
-    MAXIMO_CLASSSTRUCTUREID=21
-    MAXIMO_PREFIX=sccd
-    MAXIMO_UI_URL=https://siwr35cdwsa-tsb.sccd.ibmserviceengage.com/maximo_t4hj/ui/?event=loadapp&value=sr&additionalevent=useqbe&forcereload=true/&additionaleventvalue=ticketid=
-    ```
-
-1. Save the file.
-
-
-#### Configuring .env file connecting to an old release of Maximo/ICD system
-
-Perform tasks in this section if you have an `older` release of Maximo/ICD system(there is no OSLC Resources application in your system).
-
-1. Set `MAXIMO_AUTH` environment variable in file .env. This variable setting depends on how Maximo/ICD authentication is configured.
-
-    * `Application Server Authentication (LDAP)` - In this case, the variable has two parts separated by a blank space. The first part is the value "Basic". The second part is `user:password` base64 encoded. You can get its value through any online base64 encoder based on your ICD/Maximo user:password.
-
-    * `Native Maximo Authentication` - In this case, the variable has one part only. It is `user:password` base64 encoded. You can get its value through any online base64 encoder based on your ICD/Maximo user:password. Note, the trial ICD SaaS system has navive Maximo authentication.
-
-1. Keep `application/json` as the value of `MAXIMO_CONTEXT_TYPE` environment variable.
-
-1. Modify the hostname portion of `MAXIMO_REST_URL` environment variable to point to your ICD/Maximo system. If you are connecting to trial ICD system, you may have to modify its context root as well. For example, if the URL used to login to the trial ICD system is https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/maximo_t4hj, the URL in the .env file will be https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/meaweb_t4hj/os/MXSR.
-
-1. Set `MAXIMO_PERSONID` environment variable to a valid person ID in your ICD/Maximo system. For example, MAXADMIN. Note, the person ID is typically case sensitive.
-
-1. Set `MAXIMO_UI_URL` environment variable in the similar way as you have done for MAXIMO_REST_URL environment variable. Change its hostname and context root.
-
-    ```bash
-    # For Application Server Authentication (LDAP)
-    MAXIMO_AUTH=Basic bWF4YWRtaW46c056dXhYN1M=
-    MAXIMO_CONTEXT_TYPE=application/json
-    MAXIMO_REST_URL=https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/meaweb_t4hj/os/MXSR
-    MAXIMO_PERSONID=MAXADMIN
-    MAXIMO_UI_URL=https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/maximo_t4hj/ui/?event=loadapp&value=sr&additionalevent=useqbe&forcereload=true/&additionaleventvalue=ticketid=
-    ```
-
-    ```bash
-    # For Native Maximo Authentication
-    MAXIMO_AUTH=bWF4YWRtaW46c056dXhYN1M=
-    MAXIMO_CONTEXT_TYPE=application/json
-    MAXIMO_REST_URL=https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/meaweb_t4hj/os/MXSR
-    MAXIMO_PERSONID=MAXADMIN
-    MAXIMO_UI_URL=https://siwr35cdwsa-tr3.sccd.ibmserviceengage.com/maximo_t4hj/ui/?event=loadapp&value=sr&additionalevent=useqbe&forcereload=true/&additionaleventvalue=ticketid=
-    ```
-
-1. Save the file.
+Please refer to ServiceNow documents for its system configuration.
 
 
 ### Installing and starting the app
@@ -492,7 +315,7 @@ in the Q/A session, the virtual agent may return suggestion(s) depending on info
 
 If the entries from the knowledge base does not provide sufficient information, end users have option to open ticket.
 
-### Opening a ticket in Maximo/ICD system
+### Opening a ticket in ServiceNow system
 
 As the last resort, the virtual agent can collect information and create a new ticket on your behalf. For example, if you ask
 
@@ -518,7 +341,7 @@ After you specify the ticket severity (high, medium and low), the virtual agent 
 
 ![Screen capture of workspace tile menu](doc/source/images/straightTicket.png)
 
-As the REST API is widely available, this app can be used to integrate Waston Assistant and Discovery service with most of back-office ticketing systems. Integrates with IBM Control Desk/Maximo is provided as an example in the code.
+As the REST API is widely available, this app can be used to integrate Waston Assistant and Discovery service with most of back-office ticketing systems. Integrates with ServiceNow is provided as an example in the code.
 
 ```bash
 headers: {
