@@ -272,6 +272,7 @@ Use GitHub to clone the repository locally. In a terminal, run:
 1. Modify the hostname portion of `MAXIMO_REST_URL` environment variable to point to your ServiceNow system.
 
     ```bash
+    	#Sample ServiceNow settings in .env file
 	MAXIMO_AUTH=BASIC RtaW46SUJNc2VydmljZT
 	MAXIMO_CONTEXT_TYPE=application/json
 	MAXIMO_REST_URL=https://dev626.service-now.com/api/now/table/incident
