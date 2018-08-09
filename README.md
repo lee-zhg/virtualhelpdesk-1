@@ -23,7 +23,7 @@ Note, this is a variation of the original code pattern [VirtualHelpDesk](https:/
 
 * [IBM Watson Assistant](https://www.ibm.com/watson/developercloud/conversation.html): Build, test and deploy a bot or virtual agent across mobile devices, messaging platforms, or even on a physical robot.
 * [IBM Watson Discovery](https://www.ibm.com/watson/developercloud/discovery.html): A cognitive search and content analytics engine for applications to identify patterns, trends, and actionable insights.
-* [ServiceNowMaximo/IBM Control Desk(ICD)](https://www.servicenow.com/): Back-office ticketing system. Other ticketing system can be used alternatively.
+* [ServiceNow](https://www.servicenow.com/): Back-office ticketing system. Other ticketing system can be used alternatively.
 
 ![Demo](doc/source/images/VirtualHelpDeskComponents.png)
 
