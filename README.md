@@ -265,7 +265,19 @@ Use GitHub to clone the repository locally. In a terminal, run:
 
 ### Configuring ServiceNow
 
-Please refer to ServiceNow documents for its system configuration.
+1. Set `MAXIMO_AUTH` environment variable in file .env. It has two parts separated by a blank space. The first part is the value "Basic". The second part is `user:password` base64 encoded. You can get its value through any online base64 encoder based on your ICD/Maximo user:password.
+
+1. Keep `application/json` as the value of `MAXIMO_CONTEXT_TYPE` environment variable.
+
+1. Modify the hostname portion of `MAXIMO_REST_URL` environment variable to point to your ServiceNow system.
+
+    ```bash
+	MAXIMO_AUTH=BASIC RtaW46SUJNc2VydmljZT
+	MAXIMO_CONTEXT_TYPE=application/json
+	MAXIMO_REST_URL=https://dev626.service-now.com/api/now/table/incident
+    ```
+
+1. Save the file.
 
 
 ### Installing and starting the app
