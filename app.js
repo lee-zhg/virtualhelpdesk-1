@@ -191,10 +191,9 @@ app.post('/api/message', function (req, res) {
           var ticketid = body.substring(ticketidindex2, ticketidindex1 + 10);
           */
 
-          // For new ICD/Maximo release
-          var obj = JSON.parse(body);
-          var element = process.env.MAXIMO_PREFIX + ":ticketid";
-          var ticketid = obj[element];
+          var result = body.substring(10, body.length-1);
+          var obj = JSON.parse(result);
+          var ticketid = obj["number"];
           
           console.log('##############################222\n');
           console.log("TICKETID=" + ticketid + "\n");
@@ -207,9 +206,6 @@ app.post('/api/message', function (req, res) {
           }
           else {
             data.output.text[0] += ' TicketID=' + ticketid + ', Severity=' + data.context.severity + ' for issue: \"' + description + '\".' + '<br><br>';
-            var sr_link = process.env.MAXIMO_UI_URL + ticketid;
-            data.output.text[0] += '<html> <body> <a href=\"' + sr_link + '\" target=\"_blank\">To view the new ticket</a> </body> </html>' + '<br><br><br>';
-            
           }
 
           // reset context
@@ -387,6 +383,7 @@ function callMaximo(description, severity) {
         </max:CreateMXSR>'
     */
 
+    /*
     // Calling ICD/Maximo REST API to open ticket (for new ICD/Maximo release)
     var maximo_rest_body = '{ \
       "' + process.env.MAXIMO_PREFIX + ':description":"' + description + '", \
@@ -396,6 +393,15 @@ function callMaximo(description, severity) {
       "' + process.env.MAXIMO_PREFIX + ':classstructureid":"' + process.env.MAXIMO_CLASSSTRUCTUREID + '", \
       "' + process.env.MAXIMO_PREFIX + ':reportedpriority":' + severity + ' \
       }'
+      */
+
+    // Calling Service REST API to open ticket (for new ICD/Maximo release)
+    var maximo_rest_body = '{ \
+      "description":"' + description + '", \
+      "short_description":"' + description + '", \
+      "urgency":"1"' + ', \
+      "severity":' + severity + ' \
+      }'
 
       console.log(maximo_rest_body);
 
@@ -404,12 +410,9 @@ function callMaximo(description, severity) {
       request({
 
         headers: {
-          // For Application Server Authentication (LDAP)
           'Authorization': process.env.MAXIMO_AUTH,
-          // For Native Maximo Authentication
-          'MAXAUTH': process.env.MAXIMO_AUTH,
           'CONTENT-TYPE': process.env.MAXIMO_CONTEXT_TYPE,
-          'PROPERTIES':'*'
+          'Accept':process.env.MAXIMO_CONTEXT_TYPE
         },
 
         url: process.env.MAXIMO_REST_URL,
