@@ -16,9 +16,15 @@
 
 'use strict';
 
+const AssistantV1 = require('watson-developer-cloud/assistant/v1');
+const DiscoveryV1 = require('watson-developer-cloud/discovery/v1');
+
+// setupError will be set to an error message if we cannot recover from service setup or init error.
+let setupError = '';
+
 var express = require('express'); // app server
 var bodyParser = require('body-parser'); // parser for post requests
-var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
+//var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
 var request = require('request');
 var req = require('request');
 var dateTime = require('node-datetime');
@@ -28,7 +34,7 @@ var description = '';
 
 // for automatically deploying to IBM Cloud
 const fs = require('fs'); // file system for loading JSON;
-var Discovery = require('watson-developer-cloud/discovery/v1');
+//var Discovery = require('watson-developer-cloud/discovery/v1');
 const WatsonDiscoverySetup = require('./lib/watson-discovery-setup');
 const WatsonConversationSetup = require('./lib/watson-conversation-setup');
 const DISCOVERY_ACTION = 'rnr'; // Replaced RnR w/ Discovery but Assistant action is still 'rnr'.
@@ -45,15 +51,7 @@ app.use(express.static('./public')); // load UI from public folder
 app.use(bodyParser.json());
 
 // Create the Conversation service wrapper
-var conversation = new Conversation({
-  // If unspecified here, the CONVERSATION_USERNAME and CONVERSATION_PASSWORD env properties will be checked
-  // After that, the SDK will fall back to the bluemix-provided VCAP_SERVICES environment property
-  // username: '<username>',
-  // password: '<password>',
-  url: 'https://gateway.watsonplatform.net/conversation/api',
-  version_date: '2016-10-21',
-  version: 'v1'
-});
+const conversation = new AssistantV1({ version: '2018-02-16' });
 
 // for automatically deploying to IBM Cloud
 let workspaceID; // workspaceID will be set when the workspace is created or validated.
@@ -70,15 +68,7 @@ conversationSetup.setupConversationWorkspace(conversationSetupParams, (err, data
 });
 
 // Create the Discovery service wrapper
-var discovery = new Discovery({
-  // if left unspecified here, the SDK will fall back to the DISCOVERY_USERNAME and DISCOVERY_PASSWORD
-  // environment properties, and then Bluemix's VCAP_SERVICES environment property
-  // username: 'INSERT YOUR USERNAME FOR THE SERVICE HERE',
-  // password: 'INSERT YOUR PASSWORD FOR THE SERVICE HERE'
-  // url: 'INSERT YOUR URL FOR THE SERVICE HERE'
-  version_date: '2017-09-01',
-  url: 'https://gateway.watsonplatform.net/discovery/api/'
-});
+const discovery = new DiscoveryV1({ version: '2018-12-03' });
 
 // for automatically deploying to IBM Cloud
 let discoveryParams; // discoveryParams will be set after Discovery is validated and setup.
@@ -182,14 +172,15 @@ app.post('/api/message', function (req, res) {
 
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
+
         callMaximo(description, data.context.severity).then(function (body) {
 
           // For old ICD/Maximo release
-          /*
-          var ticketidindex2 = body.search('</TICKETID>');
-          var ticketidindex1 = body.search('<TICKETID>');
-          var ticketid = body.substring(ticketidindex2, ticketidindex1 + 10);
-          */
+          // 
+          //var ticketidindex2 = body.search('</TICKETID>');
+          //var ticketidindex1 = body.search('<TICKETID>');
+          //var ticketid = body.substring(ticketidindex2, ticketidindex1 + 10);
+          // 
 
           var result = body.substring(10, body.length-1);
           var obj = JSON.parse(result);
@@ -283,10 +274,12 @@ function callDiscovery(query_str) {
 
     // Setup Watson Discovery query
     discovery_query += process.env.DISCOVERY_URL;
-    discovery_query += '/environments/' + process.env.ENVIRONMENT_ID;
-    discovery_query += '/collections/' + process.env.COLLECTION_ID;
-    discovery_query += '/query?version=2017-11-07&deduplicate=false&highlight=true&passages=false&passages.count=5&natural_language_query=';
+    discovery_query += '/v1/environments/' + process.env.DISCOVERY_ENVIRONMENT_ID;
+    discovery_query += '/collections/' + process.env.DISCOVERY_COLLECTION_ID;
+    discovery_query += '/query?version=2018-12-03&deduplicate=false&highlight=true&passages=false&passages.count=5&natural_language_query=';
     discovery_query += query_str;
+    //console.log("+++++++++++++++++++++++")
+    //console.log(discovery_query)
 
     // call Watson Discovery service
     try {
@@ -299,8 +292,8 @@ function callDiscovery(query_str) {
         url: discovery_query,
         method: "GET",
         auth: {
-          user: process.env.DISCOVERY_USERNAME,
-          pass: process.env.DISCOVERY_PASSWORD
+          user: 'apikey',
+          pass: process.env.DISCOVERY_IAM_APIKEY
         }
       }, function (err, resp, body) {
         if (err) {
@@ -481,6 +474,18 @@ async function callDiscovery_no(query_str, req, res) {
 }
 */
 
+/**
+ * Handle setup errors by logging and appending to the global error text.
+ * @param {String} reason - The error message for the setup error.
+ */
+function handleSetupError(reason) {
+  setupError += ' ' + reason;
+  console.error('The app failed to initialize properly. Setup and restart needed.' + setupError);
+  // We could allow our chatbot to run. It would just report the above error.
+  // Or we can add the following 2 lines to abort on a setup error allowing Bluemix to restart it.
+  console.error('\nAborting due to setup error!');
+  process.exit(1);
+}
 
 module.exports = app;
 
