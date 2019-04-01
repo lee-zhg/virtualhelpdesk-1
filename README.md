@@ -51,8 +51,11 @@ And continue in section
 Node.js application must be redeployed after it is configured to connect to Maximo/ICD system. The instruction is provided in section
 * Deploying to Bluemix
 
+OR
 
-## Before you begin
+## Run locally
+
+### Before you begin
 
 * Create an IBM Cloud account -- [Sign up](https://console.bluemix.net/registration/) for IBM Cloud, or use an existing account. Your account must have available space for at least one app and two Watson services.
 
@@ -60,79 +63,68 @@ Node.js application must be redeployed after it is configured to connect to Maxi
     * The [Node.js](https://nodejs.org/#download) runtime, including the [NPM](https://www.npmjs.com) package manager.
     * The [Cloud Foundry](https://github.com/cloudfoundry/cli#downloads) CLI.
 
-## Setting up Assistant service
+### Clone the repo
+
+Clone the `virtualhelpdesk-ServiceNow` locally. 
+
+In a terminal, run:
+
+```bash
+git clone https://github.com/lee-zhg/virtualhelpdesk-1
+```
+
+### Setting up Assistant service
 
 The Watson Assistant service is used to provide underline infrastructure for the virtual agent in this code pattern.
 
-### Creating an Assistant service
+#### Creating an Assistant service
 
 Watson Assistant service is to be setup to simulate help desk level 1 activities. For topics that the virtual agent has been trained, it can help end users interactively. For subjects that the virtual agent does not understand, it searches the knowledge base through Discovery service, collects information from end user and creates a new ticket in back-office ticketing system, for example Maximo/ICD, if necessary.
 
-Slots are configured in the Assistant service to collect additional information from end users.
+Create an instance of [**Watson Assistant**](https://cloud.ibm.com/catalog/services/conversation).
 
-1. At the command line, go to the local project directory (`vaticketbot`).
+#### Importing the Assistant workspace
 
-1. Connect to IBM Cloud with the Cloud Foundry command-line tool. For more information, see the [IBM Cloud documentation](https://console.bluemix.net/docs/cli/reference/cfcommands/index.html).
-    ```bash
-    cf login
-    ```
+1. Login to [IBM Cloud console](https://cloud.ibm.com).
 
-1. Create an instance of the Assistant service in IBM Cloud. For example:
-
-    ```bash
-    cf create-service conversation free my-conversation-service
-    ```
-
-### Importing the Assistant workspace
-
-1. In your browser, navigate to the [IBM Cloud console](https://console.ng.bluemix.net/dashboard/services).
-
-1. From the **All Items** tab, click the newly created Assistant service in the `Cloud Foundry Services` list.
+1. Location and open the newly created Assistant service under the `Services` of the `Resource summary` in the dashboard.
 
     ![Screen capture of Services list](doc/source/images/conversation_service.png)
 
-1. On the next page, click `Launch tool`.
+1. Click `Launch tool`.
 
-1. In the Watson Assistant page, navigate to `Workspace` tab.
+1. Go to the `Skills` tab.
 
-1. Click the `Import workspace` icon on the top of the Assistant workspaces. 
+1. Click `Create new`
 
-1. Specify the location of the workspace JSON file in your local copy of the app project:
+1. Select the `Import skill` tab.
 
-    `<project_root>/training/ITSM_workspace.json`
+1. Click `Choose JSON file`, go to your cloned repo dir, and `Open` file `data/watson-pizzeria.json` (in the project root folder).
 
-1. Select `Everything (Intents, Entities, and Dialog)` option and then click `Import`. 
+1. Select `Everything (Intents, Entities, and Dialog)`.
 
-1. The sample ITSM workspace is created.
+1. Click `Import`.
 
-## Setting up Discovery service
+To find the `WORKSPACE_ID` of the Watson Assistant:
+
+* Go back to the `Skills` tab.
+* Find the card for the workspace you would like to use. Look for `ITSM`.
+* Click on the three dots in the upper right-hand corner of the card and select `View API Details`.
+* Copy the `Workspace ID` GUID.
+
+!["Get Workspace ID"](https://github.com/IBM/pattern-utils/blob/master/watson-assistant/assistantPostSkillGetID.gif)
+
+* In the next step, you will put this `Workspace ID` into the `.env file as ``WORKSPACE_ID``.
+
+### Setting up Discovery service
 
 The Watson Discovery service is used to provide underline infrastructure in this code pattern when searching in knowledge base.
 
-### Creating a Discovery service
+#### Creating a Discovery service
 
-Watson Discovery service is to be setup to search in the knowledge base when the virtual agent is not trained to cover specific topics.
+Create an instance of [**Watson Discovery**](https://cloud.ibm.com/catalog/services/discovery).
 
-1. At the command line, go to the local project directory (`vaticketbot`).
-
-1. Connect to IBM Cloud with the Cloud Foundry command-line tool. 
-    ```bash
-    cf login
-    ```
-
-1. Create an instance of the Discovery service in IBM Cloud. For example:
-
-    ```bash
-    cf create-service discovery lite my-discovery-service
-    ```
-
-1. Check the status of Discovery service instance in IBM Cloud, if necessary
-
-    ```bash
-    cf services
-    ```
-
-### Creating a collection and ingesting documents into Discovery service
+#### Creating a collection and ingesting documents into Discovery service
 
 1. Download and unzip the [`knowledgebase.zip`](training/knowledgebase.zip) in this repo to reveal a set of JSON documents
 
@@ -156,111 +148,54 @@ Watson Discovery service is to be setup to search in the knowledge base when the
 
 1. Select three JSON files from local file system where you downloaded and unzipped `knowledgebase.zip` file. This may take a few seconds, you will see a notification when the process is finished
 
-
-## Installing locally
-
-If you want to modify the app or use it as a basis for building your own app, install it locally. You can then deploy your modified version of the app to IBM Cloud.
-
-### Getting the files
-
-Use GitHub to clone the repository locally. In a terminal, run:
-
-   ```bash
-   git clone https://github.com/ibm/virtualhelpdesk
-   ```
-
 ### Configuring the Watson Assistant service environment
 
-1. Copy the `.env.example` file and create a new `.env` file.
+1. Copy the `.env.example` file and create a new `.env` file in the root directory of repository download.
 
-1. In IBM Cloud with the Cloud Foundry command-line tool, create a service key for the Assistant service in the format `cf create-service-key <service_instance> <service_key>`. For example:
-
-    ```bash
-    cf create-service-key my-conversation-service myKey
-    ```
-
-1. Retrieve the credentials from the service key of the Assistant service using the command `cf service-key <service_instance> <service_key>`. For example:
+1. Populate the following variables in the `.env` file based on your Assistant instance.
 
     ```bash
-    cf service-key my-conversation-service myKey
+    # Watson Assistant
+    WORKSPACE_ID=
+    ASSISTANT_URL=
+    ASSISTANT_IAM_APIKEY=
+
     ```
+    
+    To find Assistant URL and APIKEY,
 
-   The output from this command is a JSON object, as in this example:
+    * Find and select your Assistant instance 
+    * Navigate to the `Service credentials` tab.
+    * Expand the `View credentials` under Actions in the right pane.
 
-    ```JSON
-    {
-      "password": "87iT7aqpvU7l",
-      "url": "https://gateway.watsonplatform.net/conversation/api",
-      "username": "ca2905e6-7b5d-4408-9192-e4d54d83e604"
-    }
-    ```
-
-1. Copy and paste  the `password` and `username` values (without quotation marks) from the JSON into the `CONVERSATION_PASSWORD` and `CONVERSATION_USERNAME` variables in the `.env` file. For example:
-
-    ```bash
-    CONVERSATION_USERNAME=ca2905e6-7b5d-4408-9192-e4d54d83e604
-    CONVERSATION_PASSWORD=87iT7aqpvU7l
-    ```
-
-1. In the IBM Cloud console, open the Assistant service instance where you imported the workspace.
-
-1. Click the menu icon in the upper-right corner of the workspace tile, and then select **View details**.
-
-    ![Screen capture of workspace tile menu](doc/source/images/workspace_details.png)
-
-1. Click the ![Copy](doc/source/images/copy_icon.png) icon to copy the workspace ID to the clipboard.
-
-1. On the local system, paste the workspace ID into the WORKSPACE_ID variable in the `.env` file. 
-
-1. Save the file.
 
 ### Configuring the Discovery service environment
 
-1. With the Cloud Foundry command-line tool, create a service key for the Discovery service in the format `cf create-service-key <service_instance> <service_key>`. For example:
+1. Populate the following variables in the `.env` file based on your Assistant instance.
 
     ```bash
-    cf create-service-key my-discovery-service myKey
-    ```
-
-1. Retrieve the credentials from the service key of the Assistant service using the command `cf service-key <service_instance> <service_key>`. For example:
-
-    ```bash
-    cf service-key my-discovery-service myKey
-    ```
-
-   The output from this command is a JSON object, as in this example:
-
-    ```JSON
-    {
-        "password": "E8CCHs37pUwj",
-        "url": "https://gateway.watsonplatform.net/discovery/api",
-        "username": "07629c30-a460-436d-ae54-97a3b6e71902"
-    }
-    ```
-
-1. Copy and paste  the `password`, `username` and `username` values (without quotation marks) from the JSON into the `.env` file. For example:
+    # Watson Discovery
+    DISCOVERY_URL=https://gateway.watsonplatform.net/discovery/api
+    DISCOVERY_ENVIRONMENT_ID=4e6058d9-73b7-406e-95ce-145afab07f00
+    DISCOVERY_COLLECTION_ID=f0f9541d-7583-4b87-b491-5f40a317de22
+    DISCOVERY_IAM_APIKEY=xpm6QSsOTWwlmHF89sVyqjiuNmHQHHlUnJXNx0G9X6PB
 
     ```
-    DISCOVERY_USERNAME=07629c30-a460-436d-ae54-97a3b6e71902
-    DISCOVERY_PASSWORD=E8CCHs37pUwj
-    DISCOVERY_URL=https://gateway.watsonplatform.net/discovery/api/v1
-    ```
+    
+    To find Assistant URL and APIKEY,
 
-1. In the IBM Cloud console, open your Discovery service instance.
+    * Find and select your Discovery instance 
+    * Navigate to the `Service credentials` tab.
+    * Expand the `View credentials` under Actions in the right pane.
 
-1. Open the Collection in your Discovery service.
+    To find DISCOVERY_ENVIRONMENT_ID and DISCOVERY_IAM_APIKEY,
 
-1. Locate the `collection info` section, 
-
-    ![Screen capture of workspace tile menu](doc/source/images/discovery_view_collection.png)
-
-1. click `Use this collection in API` link to display the collection information.
+    * Navigate to `Manage` tab of your Discovery instance.
+    * Click `Launch tool`.
+    * Click your collection.
+    * Click the `View API details` icon next to the trash can icon.
 
     ![Screen capture of workspace tile menu](doc/source/images/discovery_collection_detail.png)
-
-1. Copy and paste Collection ID and Environment ID to the corresponding variable in the `.env` file. 
-
-1. Save the file.
 
 
 ### Configuring ServiceNow
@@ -354,19 +289,9 @@ After you specify the ticket severity (high, medium and low), the virtual agent 
 
 ![Screen capture of workspace tile menu](doc/source/images/straightTicket.png)
 
-As the REST API is widely available, this app can be used to integrate Waston Assistant and Discovery service with most of back-office ticketing systems. Integrates with ServiceNow is provided as an example in the code.
+### View ticket in ServiceNow
 
-```bash
-headers: {
-            'Authorization': 'Basic bWF4aW1vOnJlbW90ZTE=',
-            'Content-Type': 'application/json',
-          },
-          
-          url: 'https://maximo-demo75.mro.com/meaweb/os/MXSR',
-          body: '<?xml version="1.0" encoding="UTF-8"?><max:CreateMXSR xmlns:max="http://www.ibm.com/maximo" creationDateTime="2018-01-22T11:24:06" >  <max:MXSRSet>    <max:SR action="Create" > <max:DESCRIPTION changed="true">'+description+'</max:DESCRIPTION>  <max:AFFECTEDPERSON changed="true">maximo</max:AFFECTEDPERSON>  <max:STATUS maxvalue="string" changed="false">NEW</max:STATUS>   <max:REPORTDATE changed="true">2018-01-22T11:24:06</max:REPORTDATE>    <max:REPORTEDBY changed="true">maximo</max:REPORTEDBY>    <max:CLASSSTRUCTUREID changed="true">99</max:CLASSSTRUCTUREID> <max:REPORTEDPRIORITY changed="true">'+data.context.severity+'</max:REPORTEDPRIORITY> </max:SR>  </max:MXSRSet></max:CreateMXSR>',
-          method: 'POST'
-        }
-```
+Login to your ServiceNow instance. New tcket is created as instance.
 
 ## Exploring the Watson Assistant service
 
