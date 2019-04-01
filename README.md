@@ -99,7 +99,7 @@ Create an instance of [**Watson Assistant**](https://cloud.ibm.com/catalog/servi
 
 1. Select the `Import skill` tab.
 
-1. Click `Choose JSON file`, go to your cloned repo dir, and `Open` file `data/watson-pizzeria.json` (in the project root folder).
+1. Click `Choose JSON file`, go to your cloned repo dir, and `Open` file `training/ITSM_workspace.json` (in the project root folder).
 
 1. Select `Everything (Intents, Entities, and Dialog)`.
 
@@ -292,6 +292,12 @@ After you specify the ticket severity (high, medium and low), the virtual agent 
 ### View ticket in ServiceNow
 
 Login to your ServiceNow instance. New tcket is created as instance.
+
+For example, https://dev77019.service-now.com
+
+Click `Incidents` in the left pane. In the right pane, clear the filter by clicking `All` on the top.
+
+![Screen capture of workspace tile menu](doc/source/images/servicenow.png)
 
 ## Exploring the Watson Assistant service
 
